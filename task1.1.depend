@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1731427073 source:d:\iti\mobile track\c\task_day4\task1.1\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+
