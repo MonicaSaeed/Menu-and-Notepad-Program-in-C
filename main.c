@@ -31,8 +31,7 @@ struct Employee{
 
 char printMenu(int);
 void addNewEmployee(struct Employee [],int);
-void displayEployee(struct Employee [],int,int[]);
-void displayAllEployee(struct Employee [], int[]);
+void displayEployee(struct Employee [],int);
 
 int main()
 {
@@ -86,7 +85,11 @@ int main()
                     int indx;
                     printf("Eter Employee index from 1-20 For Search\n\n");
                     scanf("%d",&indx);
-                    displayEployee(emp,indx,flag);
+                    if(flag[indx-1] == 1){
+                        displayEployee(emp,indx-1);
+                    }else{
+                        printf("Not found\n");
+                    }
                     printf("Click Enter to Back Menu");
                     char ch;
                     ch = getch();
@@ -96,7 +99,16 @@ int main()
                 }
                 else if (highlight==2){
                     system("cls");
-                    displayAllEployee(emp,flag);
+                    int count=0;
+                    for(int i=0;i<sz;i++){
+                        if(flag[i] == 1){
+                            count++;
+                            displayEployee(emp,i);
+                        }
+                    }
+                    if(count==0){
+                        printf("There are no employees\n");
+                    }
                     printf("Click Enter to Back Menu");
                     char ch;
                     ch = getch();
@@ -171,34 +183,12 @@ void addNewEmployee(struct Employee emp[], int indx){
     scanf("%f", &emp[indx-1].tax);
 }
 
-void displayEployee(struct Employee emp[],int indx, int flag[]){
-    if(flag[indx-1] == 1){
-        printf("Employee %d Details\n",indx);
-        printf("----------------\n");
-        printf("Code: %d\n", emp[indx-1].code);
-        printf("Name: %s\n", emp[indx-1].name);
-        printf("Age: %d\n", emp[indx-1].age);
-        printf("Net Salary: %.2f\n\n\n", emp[indx-1].salary + emp[indx-1].bonus - emp[indx-1].tax);
-    }else{
-        printf("Not found\n");
-    }
+void displayEployee(struct Employee emp[],int indx){
+    printf("Employee %d Details\n",indx);
+    printf("----------------\n");
+    printf("Code: %d\n", emp[indx].code);
+    printf("Name: %s\n", emp[indx].name);
+    printf("Age: %d\n", emp[indx].age);
+    printf("Net Salary: %.2f\n\n\n", emp[indx].salary + emp[indx].bonus - emp[indx].tax);
 }
-void displayAllEployee(struct Employee emp[], int flag[]){
-    int count=0;
-    for(int i=0;i<sz;i++){
-        if(flag[i] == 1){
-            count++;
-            printf("Employee %d Details\n",i+1);
-            printf("----------------\n");
-            printf("Code: %d\n", emp[i].code);
-            printf("Name: %s\n", emp[i].name);
-            printf("Age: %d\n", emp[i].age);
-            printf("Net Salary: %.2f\n\n\n", emp[i].salary + emp[i].bonus - emp[i].tax);
-        }
-    }
-    if(count==0){
-        printf("There are no employees\n");
-    }
-}
-
 
