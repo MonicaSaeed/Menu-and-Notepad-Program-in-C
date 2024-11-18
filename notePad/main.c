@@ -8,8 +8,8 @@
 #define End 116
 #define Right 77
 #define Left 75
-#define Up 72
-#define Down 80
+#define Backspace 8
+#define Delete 83
 #define sz 50
 
 void textattr(int i) {
@@ -24,6 +24,12 @@ void gotoxy(int x, int y) {
 }
 
 int main() {
+    /*char ch = getch();
+    if (ch == -32) {
+        ch = getch();
+    }
+    printf("%d",ch);*/
+
     char *pstart, *pcurr;
     int steps = 0;
 
@@ -39,7 +45,7 @@ int main() {
     }
 
     char ch;
-
+    int countChar=0;
     do {
         system("cls");
         pcurr = pstart;
@@ -52,22 +58,21 @@ int main() {
         pcurr = pstart + steps;
         gotoxy(steps, 0);
 
-
         ch = getch();
         if (ch == -32) {
             ch = getch();
         }
 
-        switch (ch) {
+        switch(ch) {
             case Right: {
-                if (steps < sz) {
+                if (steps < countChar) {
                     steps++;
                     pcurr++;
                 }
                 break;
             }
             case Left: {
-                if (steps > 0) {
+                if (steps > 0 ) {
                     steps--;
                     pcurr--;
                 }
@@ -79,7 +84,7 @@ int main() {
                 break;
             }
             case End:{
-                steps=sz;
+                steps=countChar;
                 pcurr = pstart + steps;
                 break;
             }
@@ -88,16 +93,46 @@ int main() {
                 printf("You Entered the program!!! good buy");
                 return 0;
             }
+            case Backspace:{
+                if (steps > 0) {
+                    steps--;
+                    pcurr--;
+                    for (int i = steps; i < countChar - 1; i++) {
+                        *(pstart + i) = *(pstart + i + 1);
+                    }
+
+                    *(pstart + countChar - 1) = ' ';
+                    countChar--;
+                }
+                break;
+            }
+            case Delete:{
+                if (steps<countChar){
+                    for (int i = steps; i < countChar - 1; i++) {
+                        *(pstart + i) = *(pstart + i + 1);
+                    }
+
+                    *(pstart + countChar - 1) = ' ';
+                    countChar--;
+                }
+                break;
+            }
             case Esc:
                 return 0;
-            default: {
+            default:{
                 if(steps >= 0 && steps < sz){
-                    if(*pcurr!=' '){
-                        for (int i = sz - 1; i > steps; i--) {
+                    if(*pcurr!=' ' ){
+                        if(countChar>=sz){
+                            continue;
+                        }
+                        for (int i = countChar; i > steps ; i--) {
                             *(pstart + i) = *(pstart + i - 1);
                         }
+                        countChar++;
                     }
                     *pcurr = ch;
+                    if(steps==countChar)
+                        countChar++;
                     steps++;
                     pcurr++;
                 }
@@ -105,8 +140,6 @@ int main() {
             }
         }
     } while (1);
-
     free(pstart);
-
     return 0;
 }
