@@ -10,7 +10,10 @@
 #define Left 75
 #define Backspace 8
 #define Delete 83
+#define Up 72
+#define Down 80
 #define sz 50
+#define lin 10
 
 void textattr(int i) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), i);
@@ -24,122 +27,143 @@ void gotoxy(int x, int y) {
 }
 
 int main() {
-    /*char ch = getch();
-    if (ch == -32) {
-        ch = getch();
-    }
-    printf("%d",ch);*/
+    char *pstartbuffer[lin];
 
-    char *pstart, *pcurr;
-    int steps = 0;
-
-    pstart = (char *)malloc(sz * sizeof(char));
-    if (pstart == NULL) {
-        printf("Memory allocation failed!\n");
-        return 1;
+    for (int i = 0; i < lin; i++) {
+        pstartbuffer[i] = (char *)malloc(sz * sizeof(char));
+        if (pstartbuffer[i] == NULL) {
+            printf("Memory allocation failed!\n");
+            return 1;
+        }
     }
 
-    pcurr = pstart;
-    for (int i = 0; i < sz; i++) {
-        *(pcurr + i) = ' ';
+    for (int i = 0; i < lin; i++) {
+        for (int j = 0; j < sz; j++) {
+            pstartbuffer[i][j] = ' ';
+        }
     }
 
+    int currstep = 0, currline = 0;
+    int countChar[lin] = {0};
     char ch;
-    int countChar=0;
+
     do {
         system("cls");
-        pcurr = pstart;
-        for (int i = 0; i < sz; i++) {
-            textattr(0x25);
-            printf("%c", *(pcurr + i));
-            textattr(0x07);
+
+        for (int i = 0; i < lin; i++) {
+            for (int j = 0; j < sz; j++) {
+                textattr(0x25);
+                printf("%c", pstartbuffer[i][j]);
+                textattr(0x07);
+            }
+            printf("\n");
         }
 
-        pcurr = pstart + steps;
-        gotoxy(steps, 0);
+        gotoxy(currstep, currline);
 
         ch = getch();
         if (ch == -32) {
             ch = getch();
         }
 
-        switch(ch) {
+        switch (ch) {
             case Right: {
-                if (steps < countChar) {
-                    steps++;
-                    pcurr++;
+                if (currstep < countChar[currline] && currstep < sz - 1) {
+                    currstep++;
                 }
                 break;
             }
             case Left: {
-                if (steps > 0 ) {
-                    steps--;
-                    pcurr--;
+                if (currstep > 0) {
+                    currstep--;
                 }
                 break;
             }
-            case Home:{
-                steps=0;
-                pcurr = pstart;
+            case Up: {
+                if (currline > 0) {
+                    currline--;
+                    if (currstep > countChar[currline]) {
+                        currstep = countChar[currline];
+                    }
+                    // else hya hya msh h7rko
+                }
                 break;
             }
-            case End:{
-                steps=countChar;
-                pcurr = pstart + steps;
+            case Down: {
+                if (currline < lin - 1) {
+                    currline++;
+                    if (currstep > countChar[currline]) {
+                        currstep = countChar[currline];
+                    }
+                }
                 break;
             }
-            case Enter:{
-                gotoxy(0,1);
-                printf("You Entered the program!!! good buy");
+            case Home: {
+                currstep = 0;
+                currline = 0;
+                break;
+            }
+            case End: {
+                while (currline < lin - 1 && countChar[currline + 1] > 0) {
+                    currline++;
+                }
+                currstep = countChar[currline];
+                break;
+            }
+            case Backspace: {
+                if (currstep > 0) {
+                    for (int i = currstep - 1; i < countChar[currline] - 1; i++) {
+                        pstartbuffer[currline][i] = pstartbuffer[currline][i + 1];
+                    }
+                    pstartbuffer[currline][countChar[currline] - 1] = ' ';
+                    countChar[currline]--;
+                    currstep--;
+                }
+                break;
+            }
+            case Delete: {
+                if (currstep < countChar[currline]) {
+                    for (int i = currstep; i < countChar[currline] - 1; i++) {
+                        pstartbuffer[currline][i] = pstartbuffer[currline][i + 1];
+                    }
+                    pstartbuffer[currline][countChar[currline] - 1] = ' ';
+                    countChar[currline]--;
+                }
+                break;
+            }
+            case Enter: {
+                if (currline < lin - 1) {
+                    currline++;
+                    currstep = 0;
+                }
+                break;
+            }
+            case Esc: {
+                printf("Goodbye!\n");
+                for (int i = 0; i < lin; i++) {
+                    free(pstartbuffer[i]);
+                }
                 return 0;
             }
-            case Backspace:{
-                if (steps > 0) {
-                    steps--;
-                    pcurr--;
-                    for (int i = steps; i < countChar - 1; i++) {
-                        *(pstart + i) = *(pstart + i + 1);
-                    }
-
-                    *(pstart + countChar - 1) = ' ';
-                    countChar--;
-                }
-                break;
-            }
-            case Delete:{
-                if (steps<countChar){
-                    for (int i = steps; i < countChar - 1; i++) {
-                        *(pstart + i) = *(pstart + i + 1);
-                    }
-
-                    *(pstart + countChar - 1) = ' ';
-                    countChar--;
-                }
-                break;
-            }
-            case Esc:
-                return 0;
-            default:{
-                if(steps >= 0 && steps < sz){
-                    if(*pcurr!=' ' ){
-                        if(countChar>=sz){
-                            continue;
+            default: {
+                if (currstep < sz ) {
+                    if (countChar[currline] < sz ) {
+                        for (int i = countChar[currline]; i > currstep; i--) {
+                            pstartbuffer[currline][i] = pstartbuffer[currline][i - 1];
                         }
-                        for (int i = countChar; i > steps ; i--) {
-                            *(pstart + i) = *(pstart + i - 1);
-                        }
-                        countChar++;
+                        pstartbuffer[currline][currstep] = ch;
+                        countChar[currline]++;
+                        currstep++;
                     }
-                    *pcurr = ch;
-                    if(steps==countChar)
-                        countChar++;
-                    steps++;
-                    pcurr++;
                 }
+
                 break;
             }
         }
+
     } while (1);
-    free(pstart);
+    for (int i = 0; i < lin; i++) {
+        free(pstartbuffer[i]);
+    }
     return 0;
 }
